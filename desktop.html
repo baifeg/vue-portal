@@ -1,0 +1,187 @@
+<html>
+
+    <head>
+        <title>实验</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="lib/css/common.css" />
+		<link rel="stylesheet" href="lib/css/fontCss/font-awesome.min.css" />
+		<link rel="stylesheet" href="lib/css/index.css" />
+    </head>
+
+    <body>
+    	<div class="container">
+    	<div class="virtual">
+    		<div class="virtualTop">
+					<div class="countdown" id="timer"></div>
+					<ul class="clearfix">
+						<li>
+							<a href="#" id="terminalBtn">
+								<i class="fa fa-power-off" aria-hidden="true"></i>
+								<p>关机</p>
+							</a>
+						</li>
+						<li>
+							<a href="#" id="fullScreenBtn">
+								<i class="fa fa-arrows-alt" aria-hidden="true"></i>
+								<p>全屏</p>
+							</a>
+						</li>
+					</ul>
+				</div>
+				
+				<template v-for="token in tokens">
+					<virtual :token="token"></virtual>
+				</template>
+				
+    	</div>
+    	</div>
+    	<script src="/lib/js/jquery-1.7.2-min.js"></script>
+    	<script src="/lib/js/jquery.pop.js"></script>
+    	<script src="/lib/js/guacamole/all.min.js"></script>
+    	<script src="/lib/js/vue.js"></script>
+        <script type="text/javascript">
+        	var urlPrefix = localStorage.gwApiPrefix ? localStorage.gwApiPrefix : "http://121.8.157.140:18211"
+        	var app = new Vue({
+        		el: '.virtual',
+        		components: {
+        			'virtual': {
+        				template: `<div class="virtualCont" :id="token" style="diplay: none;"></div>`,
+        				props: ['token'],
+        				mounted() {
+        					var display = document.getElementById(this.token);
+
+        				    // Instantiate client, using an HTTP tunnel for communications.
+        				    var guac = new Guacamole.Client(
+        				        new Guacamole.HTTPTunnel(urlPrefix + "/desktop/tunnel/" + this.token)
+        				    );
+
+        				    // Add client to display div
+        				    display.appendChild(guac.getDisplay().getElement());
+        				    
+        				    // Error handler
+        				    guac.onerror = function(error) {
+        				        console.log(error)
+        				    };
+
+        				    // Connect
+        				    guac.connect();
+
+        				    // Disconnect on close
+        				    window.onunload = function() {
+        				        guac.disconnect();
+        				    }
+
+        				    // Mouse
+        				    var mouse = new Guacamole.Mouse(guac.getDisplay().getElement());
+
+        				    mouse.onmousedown = 
+        				    mouse.onmouseup   =
+        				    mouse.onmousemove = function(mouseState) {
+        				        guac.sendMouseState(mouseState);
+        				    };
+
+        				    // Keyboard
+        				    var keyboard = new Guacamole.Keyboard(document);
+
+        				    keyboard.onkeydown = function (keysym) {
+        				        guac.sendKeyEvent(1, keysym);
+        				    };
+
+        				    keyboard.onkeyup = function (keysym) {
+        				        guac.sendKeyEvent(0, keysym);
+        				    };
+        				},
+        			}
+        		},
+        		data: {
+        			tokens: findGetParameter('token'),
+        		},
+        		mounted() {
+        			$('.virtual .virtualCont').first().show();
+        		}
+        	});
+        	var experimentId = findGetParameter('id')[0];
+        	
+        	var maxtime = 3600; //一个小时，按秒计算，自己调整! 
+        	$.ajax({
+        		url: `${urlPrefix}/api/zsapi/practice/userExperiments/${experimentId}/surplusTime`,
+        		type: 'get',
+        	}).done(data => {
+        		maxtime = JSON.parse(data).object;
+        	});
+        	
+        	function terminalExperiment() {
+        		$.ajax({
+					url: urlPrefix + "/api/zsapi/practice/userExperiments/over",
+					type: 'post',
+					contentType: 'application/json',
+					data: JSON.stringify({
+						userExperimentId: experimentId,
+					})
+				}).done(function(data) {
+					var data = JSON.parse(data);
+					if(data.code == "0") {
+						$.pop.ok({
+							message: "成功结束该实验",
+							close: function() {
+	        					window.close();
+							}
+						});
+					} else {
+						$.pop.error({
+							message: "结束实验失败："  + data,
+							close: function() {
+								window.close();
+							}
+						});
+					};
+				});
+        	}
+        	function findGetParameter(parameterName) {
+        	    var result = [],
+        	        tmp = [];
+        	    location.search
+        	        .substr(1)
+        	        .split("&")
+        	        .forEach(function (item) {
+        	          tmp = item.split("=");
+        	          if (tmp[0] === parameterName) result.push(decodeURIComponent(tmp[1]));
+        	        });
+        	    return result;
+        	}
+        	
+        	$("#terminalBtn").click(function() {
+        		$.pop.confirm({
+        			message: "是否结束该实验？",
+        			ok: function() {
+        				terminalExperiment();
+        			},
+        		})
+        	})  
+	        function CountDown(){   
+		        if(maxtime>=0){   
+			        minutes = Math.floor(maxtime/60);   
+			        seconds = Math.floor(maxtime%60); 
+			        hours = Math.floor(maxtime/60/60);
+			        msg = "";
+			        if (hours > 1) {
+			        	msg = hours + " : ";
+			        }
+			        msg += minutes+" : "+seconds+"s";   
+			        $("#timer").text(msg);  
+			        --maxtime;   
+			    }else{   
+			        clearInterval(timer);   
+			        $.pop.warn({
+			        	message: "时间到，结束实验！",
+			        	close: function() {
+			        		terminalExperiment();
+			        	}
+			        })
+		        }   
+	        }   
+	        timer = setInterval("CountDown()",1000); 
+        </script>
+    	<script src="/lib/js/desktop/screen.js"></script>
+    </body>
+</html>

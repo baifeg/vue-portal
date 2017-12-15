@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<!--
+    	作者：AgnesXu
+    	时间：2017-07-25
+    	描述：index
+    -->
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="HandheldFriendly" content="true">
+	<meta http-equiv="X-UA-Compatible" content="IE=5">
+	<meta http-equiv="X-UA-Compatible" content="IE=7/8/9/10">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7/8/9">
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10">
+	<meta name="description" content="轩辕实习工场是以就业为导向，为大学生提供云计算和大数据专业的实践教学与技能、素质培训，实现双证就业；平台提供线上实习、实习协调、创新创业、继续教育、培训认证等服务。">
+	<script type="text/javascript">
+		if (!-[1, ] && document.documentMode == '5') {
+			alert(
+				'\u60A8\u7684\u6D4F\u89C8\u5668\u7248\u672C\u6E32\u67D3\u6A21\u5F0F\u4E0D\u6B63\u786E\uFF0C\u8BF7\u4F7F\u7528360\u6216\u8C37\u6B4C\u7B49\u6D4F\u89C8\u5668\uFF0C\u6216\u6253800800\u627E IT \u5E2E\u4F60\u628A\u6D4F\u89C8\u5668\u7684\u602A\u5F02\u6E32\u67D3\u6A21\u5F0F\u6539\u4E3A\u6807\u51C6\u6E32\u67D3\u6A21\u5F0F'
+			);
+		}
+	</script>
+	<style type="text/css">
+		.pops .simditor-body {
+			min-height: 150px !important;
+		}
+	</style>
+
+	<title>轩辕职塑云</title>
+	<link rel="icon" href="/lib/img/favicon.png" type="image/x-icon" />
+	<link rel="shortcut icon" href="/lib/img/favicon.png" type="image/x-icon" />
+
+	<link rel="stylesheet" href="/lib/css/common.css" />
+	<link rel="stylesheet" href="/lib/css/fontCss/font-awesome.min.css" />
+	<link rel="stylesheet" href="/lib/css/index.css" />
+	<link rel="stylesheet" href="/lib/layui/css/layui.css" />
+	<link rel="stylesheet" href="/lib/iconfont/iconfont.css" />
+</head>
+
+<body>
+	<app></app>
+	<div id="vueDialog"></div>
+	<!--<script src="/lib/build.js"></script>-->
+	<script type="text/javascript" src="/lib/js/jquery-1.7.2-min.js"></script>
+	<script type="text/javascript" src="/lib/js/flexslider/jquery.flexslider-min.js"></script>
+	<script type="text/javascript" src="/lib/js/goup/jquery.goup.min.js"></script>
+	<script type="text/javascript" src="/lib/js/common.js"></script>
+	<script src="/lib/js/common-zy.js"></script>
+	<script src="/lib/layui/layui.all.js"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=NBm5pQpCnBbVPrgFL7wsipT9BjPrl3Pk"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('.flexslider').flexslider({
+				directionNav: true,
+				pauseOnAction: false
+			});
+
+			layui.use("form", function () {
+				var form = layui.form;
+			});
+
+			window.onload = function () {
+				zytools.autoHeight(316) //内容高度小于窗口，z-main 填充最小高
+			}
+
+		});
+	</script>
+
+	<style>
+		.header_personName img {
+			top: 0px;
+		}
+
+		.logo img {
+			top: 0px
+		}
+	</style>
+
+</html>
