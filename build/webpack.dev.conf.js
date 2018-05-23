@@ -11,6 +11,11 @@ const portfinder = require('portfinder')
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
+// add hot-reload related code to entry chunks
+//Object.keys(baseWebpackConfig.entry).forEach(function (name) {
+//  baseWebpackConfig.entry[name] = ['./build/dev-client'].concat(baseWebpackConfig.entry[name])
+//})
+
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
@@ -48,6 +53,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: 'index.html',
+      chunks: ['app', 'vendors', 'manifest'],
       inject: true
     }),
 	new webpack.ProvidePlugin({
@@ -57,6 +63,19 @@ const devWebpackConfig = merge(baseWebpackConfig, {
 	 })
   ]
 })
+
+var pages =  utils.getMultiEntry('./src/'+config.moduleName+'/**/**/*.html');
+for (var pathname in pages) {
+  // 配置生成的html文件，定义路径等
+  var conf = {
+    filename: pathname + '.html',
+    template: pages[pathname], // 模板路径
+    chunks: [pathname, 'vendors', 'manifest'], // 每个html引用的js模块
+    inject: true              // js插入位置
+  };
+  // 需要生成几个html文件，就配置几个HtmlWebpackPlugin对象
+  devWebpackConfig.plugins.push(new HtmlWebpackPlugin(conf));
+}
 
 module.exports = new Promise((resolve, reject) => {
   portfinder.basePort = process.env.PORT || config.dev.port

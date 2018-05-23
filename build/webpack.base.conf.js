@@ -3,6 +3,14 @@ const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
+const merge = require('webpack-merge')
+
+var entries =  merge(utils.getMultiEntry('./src/'+config.moduleName+'/**/**/*.js'), {
+	app: './src/main.js'
+}); // 获得入口js文件
+var chunks = Object.keys(entries);
+console.log(entries);
+console.log(chunks)
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -21,12 +29,10 @@ const createLintingRule = () => ({
 
 module.exports = {
   context: path.resolve(__dirname, '../'),
-  entry: {
-    app: './src/main.js'
-  },
+  entry: entries,
   output: {
     path: config.build.assetsRoot,
-    filename: 'build.js',
+    filename: '[name].js',
     publicPath: process.env.NODE_ENV === 'production'
       ? config.build.assetsPublicPath
       : config.dev.assetsPublicPath
@@ -34,7 +40,9 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
-      'vue$': 'vue/dist/vue.common.js'
+      'vue$': 'vue/dist/vue.common.js',
+      '@': resolve('src'),
+      '@static': resolve('static'),
     },
   },
   module: {

@@ -24,22 +24,22 @@ const testWebpackConfig = merge(baseWebpackConfig, {
     historyApiFallback: true,
     hot: true,
     compress: true,
-    host: HOST || config.test.host,
-    port: PORT || config.test.port,
-    open: config.test.autoOpenBrowser,
-    overlay: config.test.errorOverlay
+    host: HOST || config.qa.host,
+    port: PORT || config.qa.port,
+    open: config.qa.autoOpenBrowser,
+    overlay: config.qa.errorOverlay
       ? { warnings: false, errors: true }
       : false,
-    publicPath: config.test.assetsPublicPath,
-    proxy: config.test.proxyTable,
+    publicPath: config.qa.assetsPublicPath,
+    proxy: config.qa.proxyTable,
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
-      poll: config.test.poll,
+      poll: config.qa.poll,
     }
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env': require('../config/test.env')
+      'process.env': require('../config/qa.env')
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
@@ -60,7 +60,7 @@ const testWebpackConfig = merge(baseWebpackConfig, {
 })
 
 module.exports = new Promise((resolve, reject) => {
-  portfinder.basePort = process.env.PORT || config.test.port
+  portfinder.basePort = process.env.PORT || config.qa.port
   portfinder.getPort((err, port) => {
     if (err) {
       reject(err)
@@ -75,7 +75,7 @@ module.exports = new Promise((resolve, reject) => {
         compilationSuccessInfo: {
           messages: [`Your application is running here: http://${testWebpackConfig.devServer.host}:${port}`],
         },
-        onErrors: config.test.notifyOnErrors
+        onErrors: config.qa.notifyOnErrors
         ? utils.createNotifierCallback()
         : undefined
       }))

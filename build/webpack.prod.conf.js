@@ -11,7 +11,19 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
-const env = require('../config/prod.env')
+var entries =  utils.getMultiEntry('./src/'+config.moduleName+'/**/**/*.js'); // 获得入口js文件
+var chunks = Object.keys(entries);
+
+var env = require('../config/prod.env')
+const testEnv = require('../config/test.env')
+const qaEnv = require('../config/qa.env')
+if(process.argv[2]) {
+	if(process.argv[2] === "test") {
+		env = testEnv
+	} else if (process.argv[2] === "qa") {
+		env = qaEnv
+	}
+}
 
 const webpackConfig = merge(baseWebpackConfig, {
   module: {
@@ -63,6 +75,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       filename: config.build.index,
       template: 'index.html',
       inject: true,
+      chunks: ['app', 'vendors', 'manifest'],
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -83,7 +96,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     // enable scope hoisting
     new webpack.optimize.ModuleConcatenationPlugin(),
     // split vendor js into its own file
-    new webpack.optimize.CommonsChunkPlugin({
+    /*new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
       minChunks (module) {
         // any required modules inside node_modules are extracted to vendor
@@ -95,7 +108,12 @@ const webpackConfig = merge(baseWebpackConfig, {
           ) === 0
         )
       }
-    }),
+    }),*/
+    new webpack.optimize.CommonsChunkPlugin({
+        name: 'vendor',
+        chunks: chunks,
+  	  	minChunks: 4 || chunks.length 
+      }),
     // extract webpack runtime and module manifest to its own file in order to
     // prevent vendor hash from being updated whenever app bundle is updated
     new webpack.optimize.CommonsChunkPlugin({
@@ -114,15 +132,20 @@ const webpackConfig = merge(baseWebpackConfig, {
 
     // copy custom static assets
     new CopyWebpackPlugin([
+      // {
+      //   from: path.resolve(__dirname, '../lib'),
+      //   to: "lib",
+      //   ignore: ['.*']
+      // },
       {
-        from: path.resolve(__dirname, '../lib'),
-        to: "lib",
+        from: path.resolve(__dirname, '../static'),
+        to: config.build.assetsSubDirectory,
         ignore: ['.*']
       },
-      {
-    	  from: path.resolve(__dirname, '../desktop.html'),
-    	  to: '.'
-      }
+      // {
+    	//   from: path.resolve(__dirname, '../desktop.html'),
+    	//   to: '.'
+      // }
     ])
   ]
 })
@@ -148,6 +171,21 @@ if (config.build.productionGzip) {
 if (config.build.bundleAnalyzerReport) {
   const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
   webpackConfig.plugins.push(new BundleAnalyzerPlugin())
+}
+
+//构建生成多页面的HtmlWebpackPlugin配置，主要是循环生成
+var pages =  utils.getMultiEntry('./src/'+config.moduleName+'/**/**/*.html');
+for (var pathname in pages) {
+
+  var conf = {
+    filename: pathname + '.html',
+    template: pages[pathname], // 模板路径
+    chunks: ['manifest','vendor',pathname], // 每个html引用的js模块
+    inject: true,              // js插入位置
+	hash:true
+  };
+ 
+  webpackConfig.plugins.push(new HtmlWebpackPlugin(conf));
 }
 
 module.exports = webpackConfig
